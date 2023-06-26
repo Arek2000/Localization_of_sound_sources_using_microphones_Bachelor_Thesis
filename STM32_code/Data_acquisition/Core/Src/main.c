@@ -32,8 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-//#define TXBUFLEN (50)
-#define TXBUFLEN (4)
+// Buffer length set at 6600 (2200 per one channel)
 #define DMA_ADC_BUF (6600)
 /* USER CODE END PD */
 
@@ -49,21 +48,7 @@ DMA_HandleTypeDef hdma_adc1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-//volatile uint16_t adcResultsDMA[2];
-//const int adcChannelCount = sizeof(adcResultsDMA) / sizeof(adcResultsDMA[0]);
-//uint16_t adcResults[4][1000];  //9322 max
-//uint16_t adcResults2[8000];  //9322 max
-//uint16_t adcResults3[3000];  //9322 max
-volatile uint16_t adcResultsDMA[DMA_ADC_BUF];  //9322 max
-//uint16_t n = 65;
-//uint16_t * adcResults2 = malloc(n);
-int16_t conversion_number = 0;
-//const int adcChannelCount = sizeof(adcResultsDMA);
-//volatile int adcConversionComplete = 0; // set by callback
-
-//uint16_t txBuf[TXBUFLEN] = {600, 1000, 250, 1360};
-uint16_t offset = 0;
-//uint16_t count = 0.0;
+volatile uint16_t adcResultsDMA[DMA_ADC_BUF];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,6 +99,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  // Start of DMA ADC measurements
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcResultsDMA, DMA_ADC_BUF);
   /* USER CODE END 2 */
 
@@ -338,14 +324,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
-{
-	CDC_Transmit_FS(adcResultsDMA + DMA_ADC_BUF/2, sizeof(adcResultsDMA)/2);
-}
-
+// Measurements are done automatically using DMA and then send via USB
+// when the buffer reaches half length and full length
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
 {
 	CDC_Transmit_FS(adcResultsDMA, sizeof(adcResultsDMA)/2);
+}
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	CDC_Transmit_FS(adcResultsDMA + DMA_ADC_BUF/2, sizeof(adcResultsDMA)/2);
 }
 /* USER CODE END 4 */
 
