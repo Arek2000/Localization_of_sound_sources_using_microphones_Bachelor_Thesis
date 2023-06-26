@@ -13,6 +13,7 @@ x - A random value greater than 2d. This does not affect the calculation results
 vs - Speed of sound in air, which equals 343 m/s
 These variables will be used in the algorithm for calculating the direction of the sound based on audio signals from the microphones.
 
+$$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 $$ x^2 = {(2d)^2 + (x+Δs)^2 - 2d(x+Δs)cosa} $$
 Δs = vs / f * Δphase_difference / 360
 x^2 = (2d)^2 + (x+Δs)^2 - 2d(x+Δs)cosa
